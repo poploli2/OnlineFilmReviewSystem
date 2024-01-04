@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心</title>
+    <link rel="stylesheet" type="text/css" href="/css/navandfooter.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <style>
+        html, body {
+            height: 100%; /* 确保 html 和 body 元素至少有 100% 的高度 */
+            margin: 0; /* 移除默认的 margin */
+        }
+
+        body {
+            display: flex; /* 使用 flexbox 布局 */
+            flex-direction: column; /* 子元素垂直排列 */
+        }
+
+        .container {
+            flex: 1; /* 容器将占据所有可用的空间 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content { /* 直接使用 id 选择器 */
+            flex: 1; /* 内容将占据所有可用的空间，确保页脚位于底部 */
+            display: flex; /* 如果需要，可以添加更多的 CSS 规则 */
+            flex-direction: column; /* 保持垂直方向的内容排列 */
+        }
+
+        .footer {
+            flex-shrink: 0; /* 页脚不会缩小，保持其原始大小 */
+        }
+
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">
+        <img src="/image/logo.png" alt="Logo">
+        <span>奇迹在线影评系统</span>
+    </div>
+    <div class="navbar-links">
+        <a class="nav-link" href="/index"><span>首页</span></a>
+        <a class="nav-link" href="/movies"><span>电影</span></a>
+    </div>
+    <form class="search-form" th:action="@{/search}" method="get">
+        <input type="text" name="query" placeholder="搜索影片...">
+        <button type="submit">Search</button>
+    </form>
+    <div class="navbar-user">
+        <a href="/user">个人中心</a>
+    </div>
+</nav>
+
+<div class="container my-3">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action" id="show-password-form">修改密码</button>
+                <button type="button" class="list-group-item list-group-item-action" id="view-comments">查看我的评论</button>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div id="content">
+                <p>这里是默认内容。点击左侧菜单查看更多信息。</p>
+
+                <form id="passwordChangeForm" action="/user/changePassword" method="post" style="display: none;">
+                    <div class="form-group">
+                        <label for="oldPassword">旧密码</label>
+                        <input type="password" class="form-control" id="oldPassword" name="oldPassword" placeholder="输入旧密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">新密码</label>
+                        <input type="password" class="form-control" id="newPassword" name="newPassword" placeholder="输入新密码" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </form>
+
+                <div id="userReviews" style="display: none;">
+                    <h3>我的评论</h3>
+                    <div th:if="${reviews == null or reviews.size() == 0}">
+                        <p>您还没有发表任何评论。</p>
+                    </div>
+                    <div th:if="${reviews != null and reviews.size() > 0}">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>电影名称</th>
+                                <th>评论内容</th>
+                                <th>评分</th>
+                                <th>评论时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="review : ${reviews}">
+                                <td th:text="${review.movie.title}">电影名称</td>
+                                <td th:id="'comment-content-' + ${review.reviewID}" th:text="${review.content}">评论内容</td>
+                                <td th:id="'comment-score-' + ${review.reviewID}" th:text="${review.score}">评分</td>
+                                <td th:text="${#dates.format(review.timestamp, 'yyyy-MM-dd HH:mm:ss')}">评论时间</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-edit-comment" data-toggle="modal" data-target="#editReviewModal" th:data-review-id="${review.reviewID}">修改评论</button>
+                                    <button type="button" class="btn btn-danger btn-delete-comment" data-toggle="modal" data-target="#deleteReviewModal" th:data-review-id="${review.reviewID}">删除评论</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑评论模态框 -->
+<div class="modal fade" id="editReviewModal" tabindex="-1" role="dialog" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReviewModalLabel">编辑评论</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- 修改表单的 action 和 method -->
+                <form id="editReviewForm" action="/user/editReview" method="post">
+                    <div class="form-group">
+                        <label for="reviewContent">内容</label>
+                        <textarea class="form-control" id="reviewContent" name="content" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewScore">评分</label>
+                        <input type="number" class="form-control" id="reviewScore" name="score" required>
+                    </div>
+                    <input type="hidden" id="reviewId" name="reviewId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="saveReviewChanges">保存更改</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 删除评论模态框 -->
+<div class="modal fade" id="deleteReviewModal" tabindex="-1" role="dialog" aria-labelledby="deleteReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteReviewModalLabel">确认删除</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                确定要删除这条评论吗？
+            </div>
+            <div class="modal-footer">
+                <!-- 添加删除评论的表单 -->
+                <form id="deleteReviewForm" action="/user/deleteReview" method="post" style="display: none;">
+                    <input type="hidden" id="deleteReviewId" name="reviewId">
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteReview">删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="/terms">使用条款</a>
+        <a href="/privacy">隐私政策</a>
+        <a href="/contact">联系我们</a>
+    </div>
+    <div class="footer-rights">
+        <span>版权所有 &copy; 2023 奇迹在线影评系统</span>
+    </div>
+</footer>
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    $(document).ready(function() {
+        // 检查消息并显示
+        checkMessages();
+
+        // 绑定修改密码表单的显示逻辑
+        $('#show-password-form').click(function() {
+            $('#content').children().hide(); // 隐藏所有内容
+            $('#passwordChangeForm').show(); // 显示修改密码表单
+        });
+
+        // 绑定查看评论的显示逻辑
+        $('#view-comments').click(function() {
+            $('#content').children().hide(); // 隐藏所有内容
+            $('#userReviews').show(); // 显示评论列表
+        });
+        function checkMessages() {
+            var successMessage = /*[[${successMessage}]]*/ null;
+            var errorMessage = /*[[${errorMessage}]]*/ null;
+
+            if (successMessage && successMessage !== '') {
+                alert(successMessage);
+            } else if (errorMessage && errorMessage !== '') {
+                alert(errorMessage);
+            }
+        }
+        // 绑定修改评论按钮的点击事件
+        $('.btn-edit-comment').on('click', function() {
+            var reviewId = $(this).data('review-id');
+            // 假设评论内容和评分已经在页面上可获取
+            var reviewContent = $('#comment-content-' + reviewId).text();
+            var reviewScore = $('#comment-score-' + reviewId).text();
+
+            // 在模态框中填充表单
+            $('#reviewId').val(reviewId);
+            $('#reviewContent').val(reviewContent);
+            $('#reviewScore').val(reviewScore);
+
+            // 显示模态框
+            $('#editReviewModal').modal('show');
+        });
+
+
+        // 处理编辑模态框中的“保存更改”按钮
+        $('#saveReviewChanges').on('click', function() {
+            $('#editReviewForm').submit(); // 提交表单
+        });
+
+        // 处理“删除评论”按钮点击事件
+        $('.btn-delete-comment').on('click', function() {
+            var reviewId = $(this).data('review-id');
+            $('#deleteReviewId').val(reviewId); // 设置要删除的评论ID
+            $('#deleteReviewModal').modal('show');
+        });
+
+        // 处理删除模态框中的“删除”按钮
+        $('#confirmDeleteReview').on('click', function() {
+            $('#deleteReviewForm').submit(); // 提交删除表单
+        });
+    });
+
+</script>
+</body>
+</html>

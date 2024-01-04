@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error Page</title>
+    <!-- 可以添加CSS链接 -->
+</head>
+<body>
+<div th:if="${errorMessage}">
+    <h3>Error</h3>
+    <p th:text="${errorMessage}">默认错误消息</p>
+</div>
+<div th:unless="${errorMessage}">
+    <h3>未知错误</h3>
+    <p>发生了未知错误，请返回重试。</p>
+</div>
+<a href="/" th:href="@{/}">返回首页</a>
+</body>
+</html>

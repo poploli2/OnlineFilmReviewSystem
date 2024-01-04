@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>系统后台</title>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/navandfooter.css">
+</head>
+<style>
+    html, body {
+        height: 100%; /* 确保 html 和 body 元素至少有 100% 的高度 */
+        margin: 0; /* 移除默认的 margin */
+    }
+
+    body {
+        display: flex; /* 使用 flexbox 布局 */
+        flex-direction: column; /* 子元素垂直排列 */
+    }
+
+    .container {
+        flex: 1; /* 容器将占据所有可用的空间 */
+        display: flex;
+        flex-direction: column;
+    }
+
+    #content { /* 直接使用 id 选择器 */
+        flex: 1; /* 内容将占据所有可用的空间，确保页脚位于底部 */
+        display: flex; /* 如果需要，可以添加更多的 CSS 规则 */
+        flex-direction: column; /* 保持垂直方向的内容排列 */
+    }
+
+    .footer {
+        flex-shrink: 0; /* 页脚不会缩小，保持其原始大小 */
+    }
+
+</style>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">
+        <img src="/image/logo.png" alt="Logo">
+        <span>奇迹在线影评系统</span>
+    </div>
+    <div class="navbar-links">
+        <a class="nav-link" href="/index"><span>首页</span></a>
+        <a class="nav-link" href="/movies"><span>电影</span></a>
+    </div>
+    <form class="search-form" th:action="@{/search}" method="get">
+        <input type="text" name="query" placeholder="搜索影片...">
+        <button type="submit">Search</button>
+    </form>
+    <div class="navbar-user">
+        <a href="/user">个人中心</a>
+    </div>
+</nav>
+
+<div class="
+container my-3">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action" id="user-audit">用户审核</button>
+                <button type="button" class="list-group-item list-group-item-action" id="add-movie">添加电影</button>
+                <button type="button" class="list-group-item list-group-item-action" id="view-movies">查看电影</button>
+                <button type="button" class="list-group-item list-group-item-action" id="view-comments">查看评论</button>
+                <button type="button" class="list-group-item list-group-item-action" id="user-logs">用户日志</button>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div id="content">
+                <p></p>
+                <!-- 用户审核 -->
+                <div id="userAuditSection" style="display: none;">
+                    <h3>用户审核</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>用户ID</th>
+                            <th>用户名</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.userID}">用户ID</td>
+                            <td th:text="${user.username}">用户名</td>
+                            <td>
+                                <form th:action="@{/admin/approveUser(userID=${user.userID})}" method="post">
+                                    <button type="submit" class="btn btn-primary">批准</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 添加电影 -->
+                <!-- 添加电影 -->
+                <div id="addMovieSection" style="display: none;">
+                    <h3>添加电影</h3>
+                    <form th:action="@{/admin/addMovie}" th:object="${movieDTO}" method="post" enctype="multipart/form-data" class="form-horizontal">
+                        <div class="form-group row">
+                            <label for="title" class="col-sm-2 col-form-label text-right">电影名称:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="director" class="col-sm-2 col-form-label text-right">导演:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="director" th:field="*{director}" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="actor" class="col-sm-2 col-form-label text-right">演员:</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="actor" th:field="*{actor}" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="releaseDate" class="col-sm-2 col-form-label text-right">上映日期:</label>
+                            <div class="col-sm-10">
+                                <input type="date" class="form-control" id="releaseDate" th:field="*{releaseDate}" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="introduction" class="col-sm-2 col-form-label text-right">简介:</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="introduction" th:field="*{introduction}" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="image" class="col-sm-2 col-form-label text-right">电影图片:</label>
+                            <div class="col-sm-10">
+                                <input type="file" class="form-control-file" id="image" name="image" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-10 offset-sm-2">
+                                <button type="submit" class="btn btn-primary">添加电影</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 查看电影 -->
+                <div id="viewMoviesSection" style="display: none;">
+                    <h3>电影列表</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>电影名称</th>
+                            <th>介绍</th>
+                            <th>导演</th>
+                            <th>演员</th>
+                            <th>上映时间</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="movie : ${movies}">
+                            <td th:text="${movie.title}">电影名称</td>
+                            <td th:text="${movie.introduction}">介绍</td>
+                            <td th:text="${movie.director}">导演</td>
+                            <td th:text="${movie.actor}">演员</td>
+                            <td th:text="${#dates.format(movie.releaseDate, 'yyyy-MM-dd')}">上映时间</td>
+                            <td>
+                                <form th:action="@{/admin/deleteMovie/{movieID}(movieID=${movie.movieID})}" method="post">
+                                    <input type="submit" value="删除电影" class="btn btn-danger"/>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 查看评论 -->
+                <div id="viewCommentsSection" style="display: none;">
+                    <h3>评论列表</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>评论时间</th>
+                            <th>评论人名称</th>
+                            <th>评论内容</th>
+                            <th>电影名称</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="review : ${reviews}">
+                            <td th:text="${#dates.format(review.timestamp, 'yyyy-MM-dd HH:mm:ss')}">评论时间</td>
+                            <td th:text="${review.user.username}">评论人名称</td>
+                            <td th:text="${review.content}">评论内容</td>
+                            <td th:text="${review.movie.title}">电影名称</td>
+                            <td>
+                                <form th:action="@{/admin/deleteReview/{reviewID}(reviewID=${review.reviewID})}" method="post">
+                                    <input type="submit" value="删除评论" class="btn btn-danger"/>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 用户日志 -->
+                <div id="userLogsSection" style="display: none;">
+                    <h3>访问日志</h3>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>日志ID</th>
+                            <th>用户ID</th>
+                            <th>操作</th>
+                            <th>时间戳</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="log : ${AccessLogs}">
+                            <td th:text="${log.logID}">日志ID</td>
+                            <td th:text="${log.user != null ? log.user.userID : 'N/A'}">用户ID</td>
+                            <td th:text="${log.operation}">操作</td>
+                            <td th:text="${#dates.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">时间戳</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<footer class="footer">
+    <div class="footer-links">
+        <a href="/terms">使用条款</a>
+        <a href="/privacy">隐私政策</a>
+        <a href="/contact">联系我们</a>
+    </div>
+    <div class="footer-rights">
+        <span>版权所有 &copy; 2023 奇迹在线影评系统</span>
+    </div>
+</footer>
+<script src="/js/jquery-3.3.1.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // 绑定菜单按钮的点击事件
+        $('#user-audit').click(function() {
+            $('#content').children().hide();
+            $('#userAuditSection').show();
+        });
+        $('#add-movie').click(function() {
+            $('#content').children().hide();
+            $('#addMovieSection').show();
+        });
+        $('#view-movies').click(function() {
+            $('#content').children().hide();
+            $('#viewMoviesSection').show();
+        });
+        $('#view-comments').click(function() {
+            $('#content').children().hide();
+            $('#viewCommentsSection').show();
+        });
+        $('#user-logs').click(function() {
+            $('#content').children().hide();
+            $('#userLogsSection').show();
+        });
+    });
+</script>
+</body>
+</html>
