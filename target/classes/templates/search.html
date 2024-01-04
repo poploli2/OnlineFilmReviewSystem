@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>搜索结果</title>
+    <link rel="stylesheet" type="text/css" href="/css/navandfooter.css">
+    <style>
+
+        .search-form input[type="text"] {
+            color: #333;
+            background-color: white;
+            border: none;
+            padding: 5px 10px;
+        }
+
+        .search-form input[type="text"]::placeholder {
+            color: #aaa; /* 淡灰色占位符 */
+        }
+
+        .search-form button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .search-form button:hover {
+            background-color: #666;
+        }
+
+        .navbar-user a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
+        }
+        /* Add a general reset for image and box sizing to avoid unexpected behaviors */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+
+        /* Main container for the search results */
+        .search-results {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Flex container for each movie item */
+        .movie-item {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        /* Movie poster styling */
+        .movie-poster {
+            flex: 0 0 200px; /* Adjust width as needed and prevent from shrinking */
+            margin-right: 20px;
+            border: 1px solid #ccc; /* Add border if needed */
+        }
+
+        /* Movie content styling */
+        .movie-content {
+            flex: 1;
+        }
+
+        /* Title styling */
+        .movie-title {
+            font-size: 20px; /* Adjust font size as needed */
+            font-weight: bold;
+            margin: 0 0 10px;
+        }
+
+        /* Release year styling */
+        .movie-release-year {
+            font-size: 16px;
+            color: #666; /* Adjust color as needed */
+            margin: 0 0 10px;
+        }
+
+        /* Introduction styling */
+        .movie-introduction {
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: justify;
+            text-indent: 2em; /* 段首缩进两个字符 */
+            white-space: pre-wrap; /* 保持空白符，并正常换行 */
+        }
+
+
+        /* Responsive design for smaller screens */
+        @media screen and (max-width: 768px) {
+            .movie-item {
+                flex-direction: column;
+            }
+
+            .movie-poster {
+                flex: 0 0 auto; /* Allow the poster to determine its size */
+                width: 100%; /* Full width on smaller screens */
+                margin-right: 0; /* Reset margin on smaller screens */
+                margin-bottom: 20px; /* Add space between poster and content */
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-logo">
+        <img src="/image/logo.png" alt="Logo">
+        <span>奇迹在线影评系统</span>
+    </div>
+    <div class="navbar-links">
+        <a class="nav-link" href="/index"><span>首页</span></a>
+        <a class="nav-link" href="/movies"><span>电影</span></a>
+    </div>
+    <form class="search-form" th:action="@{/search}" method="get">
+        <input type="text" name="query" placeholder="搜索影片...">
+        <button type="submit">Search</button>
+    </form>
+    <div class="navbar-user">
+        <a href="/user">个人中心</a>
+    </div>
+</nav>
+
+<div class="search-results">
+    <h2 th:text="'搜索到' + ${searchResults.size()} + '个与《' + ${query} + '》有关的影片'">搜索结果</h2>
+    <div class="movie-list">
+        <div th:each="movie : ${searchResults}" class="movie-item">
+            <div class="movie-poster">
+                <img th:src="@{'/movieimg/' + ${movie.movieID} + '.webp'}" alt="Movie Poster" />
+            </div>
+            <div class="movie-content">
+                <a th:href="@{'/movie/'+${movie.movieID}}"><div class="movie-title" th:text="${movie.title}">电影标题</div></a>
+                <div class="movie-release-year" th:text="${movie.releaseDate}">上映年份</div>
+                <div class="movie-introduction" th:text="${movie.introduction}">简介</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-links">
+        <a href="/terms">使用条款</a>
+        <a href="/privacy">隐私政策</a>
+        <a href="/contact">联系我们</a>
+    </div>
+    <div class="footer-rights">
+        <span>版权所有 &copy; 2023 奇迹在线影评系统</span>
+    </div>
+</footer>
+<script src="/js/search.js"></script>
+</body>
+</html>
